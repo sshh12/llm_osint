@@ -1,22 +1,30 @@
-from typing import List
+from typing import List, Optional
 import requests
 import os
 from bs4 import BeautifulSoup
 
 from llm_osint import cache_utils
 
+MAX_LINK_LEN = 120
+
 
 @cache_utils.cache_func
-def scrape_text(url: str) -> str:
-    resp = requests.get(
-        url="https://app.scrapingbee.com/api/v1/",
-        params={
-            "api_key": os.environ["SCRAPINGBEE_API_KEY"],
-            "url": url,
-            "premium_proxy": "true",
-            "country_code": "us",
-        },
-    )
+def scrape_text(url: str, retries: Optional[int] = 2) -> str:
+    try:
+        resp = requests.get(
+            url="https://app.scrapingbee.com/api/v1/",
+            params={
+                "api_key": os.environ["SCRAPINGBEE_API_KEY"],
+                "url": url,
+                "premium_proxy": "true",
+                "country_code": "us",
+            },
+        )
+    except RuntimeError as e:
+        if retries > 0:
+            return scrape_text(url, retries=retries - 1)
+        else:
+            raise e
     return resp.text
 
 
@@ -25,7 +33,13 @@ def _element_to_text(element) -> str:
     lines = (line.strip() for line in elem_text.splitlines())
     parts = (phrase.strip() for line in lines for phrase in line.split("  "))
     text = "\n".join(c for c in parts if c)
-    return text
+
+    links = []
+    for link in element.find_all("a", href=True):
+        if len(link["href"]) <= MAX_LINK_LEN:
+            links.append(link["href"])
+
+    return text + "\n\nLinks: " + " ".join(list(set(links)))
 
 
 def _chunk_element(element, max_size: int) -> List[str]:
