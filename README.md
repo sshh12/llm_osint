@@ -260,7 +260,7 @@ I initally tried to do this completely end-to-end as the default langchain zero 
 
 The knowledge agent is given a "gather" prompt which guides it to simply accumulate as much information as possible. It first spawns an initial web agent which does a general search for the obvious information (e.g. googling a name) and reading first-degree webpages. The results of the initial web agent are then run through a prompt to find "deep dive" areas that it should look more into. For each of these deep dive areas, a new web agent is spawned to gather information. The results of these deep dive web agents are then concatenated and the process repeats for N deep dive rounds. The full knowledge base is then fed as context for a final question about the topic.
 
-<img width="377" alt="chrome_2WjtaM1s4G" src="https://user-images.githubusercontent.com/6625384/232261244-b62b51ab-c7da-4706-ba74-243f612265cd.png">
+<img width="375" alt="chrome_40m5u5PTZY" src="https://user-images.githubusercontent.com/6625384/232329909-0af89f65-dea1-4391-aea3-2023e63b7fa4.png">
 
 #### Flow Example
 
