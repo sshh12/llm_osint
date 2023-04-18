@@ -313,3 +313,5 @@ OPENAI_API_KEY=
 SERPER_API_KEY=
 SCRAPINGBEE_API_KEY=
 ```
+
+Note: Both serper and scraping bee provide free trial usage of the APIs that should be good enough to run this a few times.
