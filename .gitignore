@@ -131,3 +131,4 @@ env.bat
 script.py
 cache/*
 *.txt
+*.bat
