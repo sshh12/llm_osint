@@ -48,7 +48,7 @@ def fetch_internet_content(name) -> str:
         GATHER_PROMPT.format(name=name),
         build_web_agent_func=lambda: build_web_agent(name),
         deep_dive_topics=10,
-        deep_dive_rounds=1,
+        deep_dive_rounds=2,
         name=name,
     )
     return "\n\n".join(knowlege_chunks)
