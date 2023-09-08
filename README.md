@@ -2,6 +2,8 @@
 
 > LLM OSINT is a proof-of-concept method of using LLMs to gather information from the internet and then perform a task with this information.
 
+_As seen on [The Wall Street Journal](https://archive.ph/p8XyR)._
+
 <img width="990" alt="ApplicationFrameHost_UWJhAyEJDw" src="https://user-images.githubusercontent.com/6625384/232262373-bbf80996-e38a-4d4e-8be9-3e05277417f0.png">
 
 ## Examples
