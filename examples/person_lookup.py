@@ -62,7 +62,7 @@ if __name__ == "__main__":
     parser.add_argument("--ask")
     args = parser.parse_args()
 
-    fn = re.sub("[^\w]", "", args.name).lower() + ".txt"
+    fn = re.sub(r"[^\w]", "", args.name).lower() + ".txt"
 
     content = fetch_internet_content(args.name)
     with open(fn, "w") as f:
