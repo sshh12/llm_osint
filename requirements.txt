@@ -3,3 +3,4 @@ openai
 black
 requests
 bs4
+langchain-community
