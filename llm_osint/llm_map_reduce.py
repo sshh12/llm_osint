@@ -5,12 +5,12 @@ from llm_osint import cache_utils, llm
 
 @cache_utils.cache_func
 def map(prompt: str, text: str, model: llm.LLMModel) -> str:
-    return model.call_as_llm(prompt.format(text=text))
+    return model.invoke(prompt.format(text=text)).content
 
 
 @cache_utils.cache_func
 def reduce(prompt: str, texts: List[str], model: llm.LLMModel) -> str:
-    return model.call_as_llm(prompt.format(texts="\n\n".join(texts)))
+    return model.invoke(prompt.format(texts="\n\n".join(texts))).content
 
 
 def map_reduce_texts(

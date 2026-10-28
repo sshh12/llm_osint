@@ -70,4 +70,4 @@ if __name__ == "__main__":
 
     if args.ask:
         model = llm.get_default_llm()
-        print(model.call_as_llm(ASK_PROMPT.format(name=args.name, internet_content=content, question=args.ask)))
+        print(model.invoke(ASK_PROMPT.format(name=args.name, internet_content=content, question=args.ask)).content)

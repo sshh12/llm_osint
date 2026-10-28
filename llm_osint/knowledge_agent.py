@@ -38,7 +38,7 @@ def run_knowledge_agent(
         deep_dive_area_prompt = knowledge_agent_constants.DEEP_DIVE_LIST_PROMPT.format(
             num_topics=deep_dive_topics, gather_prompt=gather_prompt, current_knowlege=round_knowlege, **prompt_args
         )
-        deep_dive_list = model.call_as_llm(deep_dive_area_prompt)
+        deep_dive_list = model.invoke(deep_dive_area_prompt).content
         try:
             deep_dive_areas = [v.split(". ", 1)[1] for v in deep_dive_list.strip().split("\n")]
         except IndexError:
