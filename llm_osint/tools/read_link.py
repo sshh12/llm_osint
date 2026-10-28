@@ -75,7 +75,7 @@ class ReadLinkWrapper:
 def get_read_link_tool(**kwargs) -> Tool:
     read_link = ReadLinkWrapper(**kwargs)
     return Tool(
-        name="Read Link",
+        name="read_link",
         func=read_link.run,
         description="useful to read and extract the contents of any link. the input should be a valid url starting with http or https",
     )

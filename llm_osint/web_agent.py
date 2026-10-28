@@ -1,30 +1,46 @@
 from typing import List, Optional
 
-from langchain.agents import Tool
+from langchain.agents import Tool, AgentExecutor, create_tool_calling_agent
 from langchain.memory.chat_memory import BaseChatMemory
 from langchain.memory import ConversationBufferMemory
-from langchain.agents.agent import AgentExecutor
-from langchain.agents import initialize_agent
-from langchain.agents import AgentType
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
-from llm_osint import llm, web_agent_constants
+from llm_osint import llm
+
+SYSTEM_PROMPT = """You are an automated OSINT agent who can expertly find information on persons, companies, places, and things using the provided tools.
+
+Answer the user's questions by scanning the internet for relevant data. Be very thorough.
+
+Guidelines:
+* Always read the contents of linked webpages that can give you more information to answer the query.
+* Use the contents of webpages to recursively discover information; follow links that could provide more.
+* If you have exhausted the obvious resources, do not stop early -- search for another detail you could learn more about.
+* When you have gathered enough information, respond with a thorough write-up of everything you found."""
 
 
-def build_web_agent(tools: List[Tool], memory: Optional[BaseChatMemory] = None, **custom_agent_kwargs) -> AgentExecutor:
-    agent_kwargs = {
-        "prefix": web_agent_constants.PREFIX,
-        "suffix": web_agent_constants.SUFFIX,
-        "format_instructions": web_agent_constants.FORMAT_INSTRUCTIONS,
-    }
+def build_web_agent(
+    tools: List[Tool], memory: Optional[BaseChatMemory] = None, **custom_agent_kwargs
+) -> AgentExecutor:
     if memory is None:
-        memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-    agent_kwargs.update(custom_agent_kwargs)
-    agent_chain = initialize_agent(
-        tools,
-        llm.get_default_llm(),
-        agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
-        verbose=True,
-        memory=memory,
-        agent_kwargs=agent_kwargs,
+        memory = ConversationBufferMemory(
+            memory_key="chat_history", return_messages=True, input_key="input", output_key="output"
+        )
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            ("system", SYSTEM_PROMPT),
+            MessagesPlaceholder(variable_name="chat_history", optional=True),
+            ("human", "{input}"),
+            MessagesPlaceholder(variable_name="agent_scratchpad"),
+        ]
     )
-    return agent_chain
+    agent = create_tool_calling_agent(llm.get_default_llm(), tools, prompt)
+    executor_kwargs = dict(
+        agent=agent,
+        tools=tools,
+        memory=memory,
+        verbose=True,
+        handle_parsing_errors=True,
+        max_iterations=15,
+    )
+    executor_kwargs.update(custom_agent_kwargs)
+    return AgentExecutor(**executor_kwargs)

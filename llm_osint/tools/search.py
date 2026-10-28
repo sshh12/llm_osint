@@ -48,7 +48,7 @@ class GoogleSerperSearchWrapper(GoogleSerperAPIWrapper):
 def get_search_tool(**kwargs) -> Tool:
     search = GoogleSerperSearchWrapper(**kwargs)
     return Tool(
-        name="Search Term",
+        name="search_term",
         func=search.run,
         description="useful for when you need to find information about general things, names, usernames, places, etc. the input should be a search term",
     )

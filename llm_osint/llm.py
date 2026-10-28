@@ -1,17 +1,18 @@
-from langchain.chat_models import ChatOpenAI
-from langchain.chat_models.base import BaseChatModel
+from langchain_openai import ChatOpenAI
+from langchain_core.language_models.chat_models import BaseChatModel
 
 LLMModel = BaseChatModel
 
-default_fast_llm_options = dict(model_name="gpt-4o-mini", request_timeout=120, max_retries=10, temperature=0.7)
-default_llm_options = dict(model_name="gpt-4o", request_timeout=120, max_retries=10, temperature=0.7)
+# GPT-5-era models run on the Responses API and reject a custom `temperature`
+# and `stop` sequences, so neither is set here (the tool-calling agent in
+# web_agent.py drives the model with native function calling, not stop tokens).
+default_fast_llm_options = dict(model="gpt-5.4-mini", request_timeout=120, max_retries=10)
+default_llm_options = dict(model="gpt-5.5", request_timeout=120, max_retries=10)
 
 
 def get_default_fast_llm() -> LLMModel:
-    chat = ChatOpenAI(**default_fast_llm_options)
-    return chat
+    return ChatOpenAI(**default_fast_llm_options)
 
 
 def get_default_llm() -> LLMModel:
-    chat = ChatOpenAI(**default_llm_options)
-    return chat
+    return ChatOpenAI(**default_llm_options)
