@@ -4,10 +4,25 @@ from langchain.agents import Tool
 from llm_osint import cache_utils
 
 
+# Free Serper plans reject advanced-operator queries (quotes, site:, etc.) with a
+# 400; strip the operators the free tier disallows so a query still returns results.
+_FREE_PLAN_DISALLOWED = '"'
+
+
+def _sanitize_query(query: str) -> str:
+    cleaned = query.translate({ord(c): " " for c in _FREE_PLAN_DISALLOWED})
+    return " ".join(cleaned.split()).strip() or query
+
+
 class GoogleSerperSearchWrapper(GoogleSerperAPIWrapper):
     @cache_utils.cache_func
     def run(self, query: str) -> str:
-        return super().run(query)
+        try:
+            return super().run(_sanitize_query(query))
+        except Exception as e:
+            # Never let a single failed search kill the whole agent run; hand the
+            # agent a readable message so it can reformulate or try another step.
+            return f"Search failed for {query!r}: {e}. Try a simpler query without quotes or operators."
 
     def _parse_results(self, results: dict) -> str:
         snippets = []
@@ -48,7 +63,7 @@ class GoogleSerperSearchWrapper(GoogleSerperAPIWrapper):
 def get_search_tool(**kwargs) -> Tool:
     search = GoogleSerperSearchWrapper(**kwargs)
     return Tool(
-        name="Search Term",
+        name="search_term",
         func=search.run,
         description="useful for when you need to find information about general things, names, usernames, places, etc. the input should be a search term",
     )

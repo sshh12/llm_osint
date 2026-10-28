@@ -61,21 +61,25 @@ class ReadLinkWrapper:
     def run(self, query: str) -> str:
         if query.endswith(".pdf"):
             return "Cannot read links that end in pdf"
-        chunks = chunk_and_strip_html(scrape_text(query), 4000)
-        format_args = {**self.format_kwargs, "link": query, "example_instructions": self.example_instructions}
-        return map_reduce_texts(
-            chunks,
-            map_prompt=self.map_prompt.format(**format_args),
-            reduce_prompt=self.reduce_prompt.format(**format_args),
-            reduce_chunks=100,
-            model=self.model,
-        )
+        try:
+            chunks = chunk_and_strip_html(scrape_text(query), 4000)
+            format_args = {**self.format_kwargs, "link": query, "example_instructions": self.example_instructions}
+            return map_reduce_texts(
+                chunks,
+                map_prompt=self.map_prompt.format(**format_args),
+                reduce_prompt=self.reduce_prompt.format(**format_args),
+                reduce_chunks=100,
+                model=self.model,
+            )
+        except Exception as e:
+            # A blocked/unreachable page must not crash the run; let the agent move on.
+            return f"Could not read {query!r}: {e}. Try a different link."
 
 
 def get_read_link_tool(**kwargs) -> Tool:
     read_link = ReadLinkWrapper(**kwargs)
     return Tool(
-        name="Read Link",
+        name="read_link",
         func=read_link.run,
         description="useful to read and extract the contents of any link. the input should be a valid url starting with http or https",
     )

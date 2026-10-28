@@ -8,7 +8,8 @@ def run_chain_with_retries(agent_chain: AgentExecutor, retries: int, **agent_run
     exception = None
     for _ in range(retries):
         try:
-            return agent_chain.run(**agent_run_kwargs)
+            result = agent_chain.invoke(agent_run_kwargs)
+            return result["output"] if isinstance(result, dict) else result
         except Exception as e:
             exception = e
     raise exception
@@ -37,7 +38,7 @@ def run_knowledge_agent(
         deep_dive_area_prompt = knowledge_agent_constants.DEEP_DIVE_LIST_PROMPT.format(
             num_topics=deep_dive_topics, gather_prompt=gather_prompt, current_knowlege=round_knowlege, **prompt_args
         )
-        deep_dive_list = model.call_as_llm(deep_dive_area_prompt)
+        deep_dive_list = model.invoke(deep_dive_area_prompt).content
         try:
             deep_dive_areas = [v.split(". ", 1)[1] for v in deep_dive_list.strip().split("\n")]
         except IndexError:
